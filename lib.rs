@@ -3,7 +3,6 @@ use url::Url;
 use wasm_bindgen::JsValue;
 use worker::*;
 
-/// MIME type required by the DNS-over-HTTPS wire format (RFC 8484).
 const DNS_MIME: &str = "application/dns-message";
 
 /// UPSTREAM DoH ENDPOINT CONFIGURATION
@@ -20,7 +19,6 @@ async fn fetch(mut req: Request, _env: Env, ctx: Context) -> Result<Response> {
     let url = req.url()?;
     let method = req.method();
 
-    // Path filter: drop random scanner bots instantly to protect your daily request quota.
     if url.path() != DNS_PATH {
         let origin = url.origin().ascii_serialization();
         return Response::error(
@@ -29,7 +27,6 @@ async fn fetch(mut req: Request, _env: Env, ctx: Context) -> Result<Response> {
         );
     }
 
-    // Instant CORS preflight response.
     if method == Method::Options {
         let mut headers = Headers::new();
         headers.set("Access-Control-Allow-Origin", "*")?;
@@ -42,14 +39,12 @@ async fn fetch(mut req: Request, _env: Env, ctx: Context) -> Result<Response> {
     let is_get = method == Method::Get;
     let cache = Cache::default();
 
-    // Serve from Cloudflare's edge cache if available.
     if is_get {
         if let Some(cached) = cache.get(&req, false).await? {
             return Ok(cached);
         }
     }
 
-    // Build the upstream target URL, forwarding the query string (?dns=... on GET).
     let mut target_url =
         Url::parse(UPSTREAM_DOH_ENDPOINT).expect("UPSTREAM_DOH_ENDPOINT must be a valid URL");
     target_url.set_query(url.query());
@@ -63,10 +58,6 @@ async fn fetch(mut req: Request, _env: Env, ctx: Context) -> Result<Response> {
     init.with_method(method.clone());
     init.with_headers(upstream_headers);
 
-    // NOTE: unlike the JS version, we can't hand the incoming ReadableStream
-    // straight through to the outbound fetch — we buffer it instead. DoH POST
-    // bodies are a single DNS wire-format packet (usually well under 4KB), so
-    // this buffering is effectively free in practice.
     if method == Method::Post {
         let body = req.bytes().await?;
         let js_body: JsValue = Uint8Array::from(body.as_slice()).into();
@@ -94,7 +85,6 @@ async fn fetch(mut req: Request, _env: Env, ctx: Context) -> Result<Response> {
         .with_status(status)
         .with_headers(out_headers);
 
-    // Save to cache asynchronously in the background without making the client wait.
     if is_get && ok {
         let cache_copy = response.cloned()?;
         ctx.wait_until(async move {
