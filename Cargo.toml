@@ -9,7 +9,7 @@ name = "doh_proxy"
 path = "lib.rs"
 
 [dependencies]
-worker = "0.8"
+worker = "0.7"
 js-sys = "0.3"
 wasm-bindgen = "0.2.125"
 url = "2"
