@@ -1,0 +1,21 @@
+[package]
+name = "doh-proxy"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+worker = "0.8"
+js-sys = "0.3"
+wasm-bindgen = "0.2"
+url = "2"
+
+# Keep the compiled .wasm small — smaller binaries instantiate faster,
+# which matters more for cold starts than raw execution speed does here.
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
+opt-level = "z"
