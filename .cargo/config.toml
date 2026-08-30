@@ -1,2 +1,4 @@
-[target.wasm32-unknown-unknown]
-rustflags = ["-C", "target-feature=+reference-types"]
+      - name: Build Worker
+        run: worker-build --release
+        env:
+          CARGO_TARGET_WASM32_UNKNOWN_UNKNOWN_RUSTFLAGS: "-C target-feature=+reference-types"
