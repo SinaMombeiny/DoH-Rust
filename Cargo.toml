@@ -14,8 +14,6 @@ js-sys = "0.3"
 wasm-bindgen = "0.2.125"
 url = "2"
 
-# Keep the compiled .wasm small — smaller binaries instantiate faster,
-# which matters more for cold starts than raw execution speed does here.
 [profile.release]
 lto = true
 strip = true
