@@ -13,7 +13,7 @@ jobs:
         with:
           targets: wasm32-unknown-unknown
       - name: Install worker-build
-        run: cargo install -q worker-build
+        run: cargo install -q worker-build --version "^0.7"
       - name: Build Worker
         run: worker-build --release
       - name: Deploy with Wrangler
