@@ -14,21 +14,8 @@ jobs:
           targets: wasm32-unknown-unknown
       - name: Install worker-build
         run: cargo install -q worker-build
-      - name: Install wasm-tools
-        run: cargo install wasm-tools --locked
-      - name: Manual build (diagnostic)
-        run: cargo build --release --target wasm32-unknown-unknown
-        env:
-          CARGO_ENCODED_RUSTFLAGS: "-Ctarget-feature=+reference-types"
-      - name: Check wasm features
-        run: |
-          wasm-tools validate --features reference-types target/wasm32-unknown-unknown/release/doh_proxy.wasm \
-            && echo "✅ reference-types present after manual cargo build" \
-            || echo "❌ reference-types missing even from manual cargo build"
       - name: Build Worker
         run: worker-build --release
-        env:
-          CARGO_ENCODED_RUSTFLAGS: "-Ctarget-feature=+reference-types"
       - name: Deploy with Wrangler
         uses: cloudflare/wrangler-action@v3
         with:
